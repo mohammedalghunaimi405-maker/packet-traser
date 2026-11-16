@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cisco Packet Tracer Web Pro - محاكي الشبكات المتكامل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-main: #070b14;
+    --bg-panel: #0f172a;
+    --bg-card: #1e293b;
+    --bg-hover: #293548;
+    --border-color: #334155;
+    --accent-cyan: #06b6d4;
+    --accent-blue: #3b82f6;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --accent-rose: #f43f5e;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    height: 58px;
+    background: linear-gradient(90deg, #0b1120 0%, #172554 50%, #0b1120 100%);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    z-index: 20;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px; color: #fff;
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.45);
+  }
+  .brand h1 { font-size: 17px; font-weight: 800; }
+  .brand span { font-size: 11px; color: var(--accent-cyan); display: block; margin-top: -4px; }
+
+  .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tool-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 13px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+  .tool-btn:hover { background: var(--bg-hover); border-color: var(--accent-cyan); }
+  .tool-btn.active {
+    background: rgba(6, 182, 212, 0.18);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+  }
+  .tool-btn.danger:hover { border-color: var(--accent-rose); color: var(--accent-rose); }
+  .tool-btn.sim { background: linear-gradient(135deg, #059669, #10b981); border: none; color: #fff; }
+  .tool-btn.sim:hover { filter: brightness(1.1); }
+
+  .main-container {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  aside.palette {
+    width: 245px;
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 15;
+    overflow-y: auto;
+  }
+  .palette-section { padding: 14px; border-bottom: 1px solid var(--border-color); }
+  .palette-title {
+    font-size: 12px; font-weight: 800; color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .device-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: grab;
+    transition: all 0.2s;
+  }
+  .device-item:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent-cyan);
+    transform: translateY(-2px);
+  }
+  .device-item svg { width: 32px; height: 32px; margin-bottom: 4px; pointer-events: none; }
+  .device-item span { display: block; font-size: 11px; font-weight: 700; pointer-events: none; }
+  .device-item small { display: block; font-size: 9px; color: var(--text-muted); pointer-events: none; }
+
+  .cable-list { display: flex; flex-direction: column; gap: 6px; }
+  .cable-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    transition: 0.2s;
+  }
+  .cable-btn:hover { background: var(--bg-hover); }
+  .cable-btn.selected { border-color: var(--accent-amber); background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+  .cable-line { width: 22px; height: 3px; border-radius: 2px; }
+
+  .workspace {
+    flex: 1;
+    position: relative;
+    background-color: #050811;
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.1) 0%, transparent 75%),
+      linear-gradient(rgba(30, 41, 59, 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30, 41, 59, 0.4) 1px, transparent 1px),
+      linear-gradient(rgba(30, 41, 59, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(30, 41, 59, 0.15) 1px, transparent 1px);
+    background-size: 100% 100%, 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    overflow: hidden;
+  }
+
+  #cables-svg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+  }
+
+  .net-node {
+    position: absolute;
+    width: 96px;
+    padding: 8px 6px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid var(--border-color);
+    text-align: center;
+    cursor: move;
+    z-index: 5;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .net-node:hover { border-color: var(--accent-cyan); box-shadow: 0 0 18px rgba(6, 182, 212, 0.3); }
+  .net-node.selected { border-color: var(--accent-amber); box-shadow: 0 0 22px rgba(245, 158, 11, 0.4); }
+  .net-node.ping-src { border-color: var(--accent-emerald); box-shadow: 0 0 22px rgba(16, 185, 129, 0.55); }
+  .net-node svg { width: 42px; height: 42px; pointer-events: none; }
+  .net-node .node-name { font-size: 12px; font-weight: 800; margin-top: 2px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+  .net-node .node-ip { font-size: 10px; font-family: 'Fira Code', monospace; color: var(--accent-cyan); margin-top: 1px; pointer-events: none; }
+
+  .packet-dot {
+    position: absolute;
+    width: 26px; height: 26px;
+    background: var(--accent-emerald);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; color: #fff;
+    box-shadow: 0 0 20px var(--accent-emerald);
+    z-index: 10;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  .bottom-dock {
+    height: 205px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 15;
+  }
+  .dock-tabs {
+    display: flex;
+    background: #090e1a;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 12px;
+  }
+  .dock-tab {
+    padding: 8px 16px;
+    font-size: 12px; font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+  }
+  .dock-tab:hover { color: #fff; }
+  .dock-tab.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+  .dock-content { flex: 1; padding: 10px 16px; overflow-y: auto; font-size: 12px; }
+  .dock-pane { display: none; height: 100%; }
+  .dock-pane.active { display: block; }
+
+  table.sim-table { width: 100%; border-collapse: collapse; text-align: right; }
+  table.sim-table th { background: var(--bg-card); padding: 6px 10px; color: var(--accent-cyan); font-size: 11px; }
+  table.sim-table td { padding: 6px 10px; border-bottom: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 11px; }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(5px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    width: 730px; max-width: 95vw; height: 520px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.85);
+  }
+  .modal-header {
+    padding: 12px 18px;
+    background: #090e1a;
+    border-bottom: 1px solid var(--border-color);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-header h3 { font-size: 15px; color: var(--accent-cyan); }
+  .close-btn { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; }
+  .close-btn:hover { color: var(--accent-rose); }
+
+  .modal-tabs { display: flex; background: var(--bg-card); padding: 0 12px; border-bottom: 1px solid var(--border-color); }
+  .m-tab { padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; }
+  .m-tab.active { color: #fff; border-bottom-color: var(--accent-cyan); }
+  .modal-body { flex: 1; padding: 16px; overflow-y: auto; }
+
+  .cli-screen {
+    background: #02040a;
+    color: #22c55e;
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    height: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
+    display: flex; flex-direction: column;
+    direction: ltr; text-align: left;
+  }
+  .cli-output { flex: 1; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; margin-bottom: 8px; user-select: text; }
+  .cli-input-line { display: flex; align-items: center; gap: 6px; }
+  .cli-input-line input {
+    flex: 1; background: transparent; border: none; color: #fff;
+    font-family: 'Fira Code', monospace; font-size: 13px; outline: none;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 12px; color: var(--text-muted); font-weight: 700; }
+  .form-group input, .form-group select {
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    color: #fff; padding: 8px 10px; border-radius: 6px;
+    font-family: 'Fira Code', monospace; font-size: 13px;
+  }
+
+  .code-editor {
+    background: #02040a; color: #e2e8f0;
+    font-family: 'Fira Code', monospace; font-size: 12px;
+    padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);
+    height: 330px; overflow-y: auto; white-space: pre;
+    direction: ltr; text-align: left; user-select: text;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">PT</div>
+    <div>
+      <h1>Cisco Packet Tracer Pro</h1>
+      <span>محاكي الشبكات والبرمجة المتكامل</span>
+    </div>
+  </div>
+  <div class="toolbar">
+    <button class="tool-btn active" id="btn-select" onclick="setMode('select')">🖱️ تحديد وتحريك</button>
+    <button class="tool-btn sim" id="btn-ping" onclick="setMode('ping')">✉️ إرسال حزمة (Ping PDU)</button>
+    <button class="tool-btn" onclick="openCodeModal()">💻 محرك اللغات (C++ / Java / JS / Py)</button>
+    <button class="tool-btn" onclick="loadSampleTopology()">🌐 شبكة افتراضية</button>
+    <button class="tool-btn danger" onclick="clearWorkspace()">🗑️ مسح الساحة</button>
+  </div>
+</header>
+
+<div class="main-container">
+  <aside class="palette">
+    <div class="palette-section">
+      <div class="palette-title">أجهزة الشبكة (اسحب أو اضغط)</div>
+      <div class="device-grid">
+        <div class="device-item" draggable="true" ondragstart="onPaletteDragStart(event, 'router')" onclick="addDevice('router')">
+          <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/><path d="M16 18l16 12M32 18L16 30M24 12v24M12 24h24" stroke="#fff" stroke-width="2"/></svg>
+          <span>Router 2911</span>
+          <small>موجه شبكات</small>
+        </div>
+        <div class="device-item" draggable="true" ondragstart="onPaletteDragStart(event, 'switch')" onclick="addDevice('switch')">
+          <svg viewBox="0 0 48 48"><rect x="6" y="14" width="36" height="20" rx="4" fill="#0d9488" stroke="#2dd4bf" stroke-width="2"/><path d="M12 20h10l-3-3m17 11H26l3 3" stroke="#fff" stroke-width="2" fill="none"/></svg>
+          <span>Switch 2960</span>
+          <small>مبدل طبقة 2</small>
+        </div>
+        <div class="device-item" draggable="true" ondragstart="onPaletteDragStart(event, 'l3switch')" onclick="addDevice('l3switch')">
+          <svg viewBox="0 0 48 48"><rect x="6" y="12" width="36" height="24" rx="4" fill="#4f46e5" stroke="#818cf8" stroke-width="2"/><circle cx="24" cy="24" r="6" stroke="#fff" stroke-width="2" fill="none"/></svg>
+          <span>Switch 3560</span>
+          <small>مبدل طبقة 3</small>
+        </div>
+        <div class="device-item" draggable="true" ondragstart="onPaletteDragStart(event, 'pc')" onclick="addDevice('pc')">
+          <svg viewBox="0 0 48 48"><rect x="10" y="10" width="28" height="20" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="2"/><path d="M18 36h12M24 30v6" stroke="#94a3b8" stroke-width="2"/></svg>
+          <span>PC-PT</span>
+          <small>حاسب مكتبي</small>
+        </div>
+        <div class="device-item" draggable="true" ondragstart="onPaletteDragStart(event, 'server')" onclick="addDevice('server')">
+          <svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="36" rx="3" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/><circle cx="24" cy="14" r="2" fill="#10b981"/><circle cx="24" cy="22" r="2" fill="#10b981"/></svg>
+          <span>Server-PT</span>
+          <small>خادم ويب/DHCP</small>
+        </div>
+        <div class="device-item" draggable="true" ondragstart="onPaletteDragStart(event, 'firewall')" onclick="addDevice('firewall')">
+          <svg viewBox="0 0 48 48"><rect x="8" y="12" width="32" height="24" rx="3" fill="#be123c" stroke="#fb7185" stroke-width="2"/><path d="M8 20h32M8 28h32M20 12v8M30 20v8M18 28v8" stroke="#fecdd3" stroke-width="1.5"/></svg>
+          <span>ASA 5506</span>
+          <small>جدار حماية</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="palette-section">
+      <div class="palette-title">الكابلات والتوصيل</div>
+      <div class="cable-list">
+        <button class="cable-btn" id="cable-straight" onclick="selectCable('straight')">
+          <div class="cable-line" style="background:#10b981;"></div>
+          <span>Copper Straight-Through</span>
+        </button>
+        <button class="cable-btn" id="cable-crossover" onclick="selectCable('crossover')">
+          <div class="cable-line" style="background:#f59e0b; border-bottom:2px dashed #000;"></div>
+          <span>Copper Cross-Over</span>
+        </button>
+        <button class="cable-btn" id="cable-fiber" onclick="selectCable('fiber')">
+          <div class="cable-line" style="background:#f97316;"></div>
+          <span>Fiber Optic (ألياف ضوئية)</span>
+        </button>
+        <button class="cable-btn" id="cable-serial" onclick="selectCable('serial')">
+          <div class="cable-line" style="background:#ef4444;"></div>
+          <span>Serial DCE (ربط راوترات)</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="palette-section" style="font-size:11px; color:var(--text-muted); line-height:1.6;">
+      <strong style="color:var(--accent-cyan);">💡 طريقة الاستخدام:</strong><br>
+      • <b>نقر مزدوج</b> على أي جهاز لفتح الإعدادات و Cisco CLI.<br>
+      • اختر كابل ثم اضغط على الجهاز الأول ثم الثاني للتوصيل.<br>
+      • اضغط <b>إرسال حزمة</b> ثم اختر جهازين لمحاكاة الـ Ping.
+    </div>
+  </aside>
+
+  <main class="workspace" id="workspace" ondragover="event.preventDefault()" ondrop="onWorkspaceDrop(event)">
+    <svg id="cables-svg"></svg>
+  </main>
+</div>
+
+<div class="bottom-dock">
+  <div class="dock-tabs">
+    <div class="dock-tab active" onclick="switchDock('sim', this)">📡 سجل حزم البيانات وطبقات OSI</div>
+    <div class="dock-tab" onclick="switchDock('arp', this)">📋 جداول التوجيه وعناوين IP</div>
+    <div class="dock-tab" onclick="switchDock('console', this)">🖥️ سجل النظام المباشر</div>
+  </div>
+  <div class="dock-content">
+    <div class="dock-pane active" id="pane-sim">
+      <table class="sim-table">
+        <thead>
+          <tr>
+            <th>الوقت</th>
+            <th>الحالة</th>
+            <th>المرسل (Source)</th>
+            <th>المستقبل (Destination)</th>
+            <th>البروتوكول</th>
+            <th>تحليل طبقات OSI 7 Layers</th>
+          </tr>
+        </thead>
+        <tbody id="sim-log-body">
+          <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">لا توجد حزم مرسلة بعد. اضغط على "إرسال حزمة (Ping PDU)" واختر جهازين.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dock-pane" id="pane-arp">
+      <div id="routing-summary" style="font-family:'Fira Code', monospace; font-size:12px; color:#cbd5e1;"></div>
+    </div>
+    <div class="dock-pane" id="pane-console">
+      <div id="sys-log" style="font-family:'Fira Code', monospace; font-size:12px; color:var(--accent-emerald);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة إعدادات الجهاز و Cisco CLI -->
+<div class="modal-overlay" id="device-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-device-title">إعدادات الجهاز</h3>
+      <button class="close-btn" onclick="closeModal('device-modal')">✖</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="m-tab active" onclick="switchModalTab('config', this)">⚙️ إعدادات IP والمنافذ</div>
+      <div class="m-tab" onclick="switchModalTab('cli', this)">💻 موجه الأوامر (Cisco IOS CLI)</div>
+      <div class="m-tab" onclick="switchModalTab('desktop', this)">🖥️ سطح المكتب (Command Prompt)</div>
+    </div>
+    <div class="modal-body">
+      <div id="mtab-config">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>اسم الجهاز (Hostname)</label>
+            <input type="text" id="cfg-hostname">
+          </div>
+          <div class="form-group">
+            <label>المنفذ (Interface)</label>
+            <select id="cfg-iface" onchange="loadInterfaceData()">
+              <option value="Gig0/0">GigabitEthernet0/0</option>
+              <option value="Gig0/1">GigabitEthernet0/1</option>
+              <option value="Fast0/0">FastEthernet0/0</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>عنوان الشبكة (IPv4 Address)</label>
+            <input type="text" id="cfg-ip" placeholder="192.168.10.10">
+          </div>
+          <div class="form-group">
+            <label>قناع الشبكة (Subnet Mask)</label>
+            <input type="text" id="cfg-mask" placeholder="255.255.255.0">
+          </div>
+          <div class="form-group">
+            <label>البوابة الافتراضية (Default Gateway)</label>
+            <input type="text" id="cfg-gw" placeholder="192.168.10.1">
+          </div>
+          <div class="form-group">
+            <label>حالة المنفذ (Port Status)</label>
+            <select id="cfg-status">
+              <option value="up">ON (no shutdown)</option>
+              <option value="down">OFF (shutdown)</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:18px; display:flex; justify-content:space-between;">
+          <button class="tool-btn danger" onclick="deleteSelectedDevice()">🗑️ حذف الجهاز</button>
+          <button class="tool-btn sim" onclick="saveDeviceConfig()">💾 حفظ وتطبيق الإعدادات</button>
+        </div>
+      </div>
+
+      <div id="mtab-cli" style="display:none; height:100%;">
+        <div class="cli-screen" onclick="document.getElementById('cli-input').focus()">
+          <div class="cli-output" id="cli-output"></div>
+          <div class="cli-input-line">
+            <span id="cli-prompt">Router></span>
+            <input type="text" id="cli-input" onkeydown="handleCliKey(event)" placeholder="Type: enable, conf t, int gig0/0, ip address ..., no shutdown, show ip int brief">
+          </div>
+        </div>
+      </div>
+
+      <div id="mtab-desktop" style="display:none;">
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">اختبار الاتصال المباشر (Ping Tool) من هذا الجهاز:</p>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="desk-ping-ip" placeholder="أدخل IP الجهاز الهدف (مثال: 192.168.10.50)" style="flex:1; background:var(--bg-card); border:1px solid var(--border-color); color:#fff; padding:8px; border-radius:6px; font-family:'Fira Code';">
+          <button class="tool-btn sim" onclick="runDesktopPing()">تنفيذ Ping</button>
+        </div>
+        <div id="desk-ping-out" style="margin-top:12px; background:#02040a; padding:12px; border-radius:8px; font-family:'Fira Code'; font-size:12px; color:#38bdf8; min-height:180px; direction:ltr; text-align:left; white-space:pre-wrap; user-select:text;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- نافذة محرك لغات البرمجة الشبكية -->
+<div class="modal-overlay" id="code-modal">
+  <div class="modal-box" style="width:800px; height:550px;">
+    <div class="modal-header">
+      <h3>💻 محرك البرمجة الشبكية متعدد اللغات (Network Engine)</h3>
+      <button class="close-btn" onclick="closeModal('code-modal')">✖</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="m-tab active" onclick="selectCodeLang('cpp', this)">C++ (Packet Routing)</div>
+      <div class="m-tab" onclick="selectCodeLang('java', this)">Java (Subnet & Socket)</div>
+      <div class="m-tab" onclick="selectCodeLang('js', this)">JavaScript (Live Engine)</div>
+      <div class="m-tab" onclick="selectCodeLang('py', this)">Python (Cisco Netmiko)</div>
+    </div>
+    <div class="modal-body">
+      <div class="code-editor" id="code-display"></div>
+      <div style="margin-top:12px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:12px; color:var(--text-muted);">خوارزميات توجيه الحزم وفحص الشبكات الجاهزة للتنفيذ</span>
+        <div style="display:flex; gap:8px;">
+          <button class="tool-btn" onclick="copyCode()">📋 نسخ الكود</button>
+          <button class="tool-btn sim" onclick="executeSimulatedCode()">▶️ تشغيل الكود في المحاكي</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let devices = [];
+let links = [];
+let mode = 'select';
+let selectedCableType = null;
+let cableSourceNode = null;
+let pingSourceNode = null;
+let activeDevice = null;
+let cliState = { mode: 'user', iface: 'Gig0/0' };
+let idCounter = 1;
+
+// متغيرات السحب الموحدة لأداء سريع بدون تعليق
+let draggedDev = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let paletteDragType = null;
+
+const workspace = document.getElementById('workspace');
+const cablesSvg = document.getElementById('cables-svg');
+
+const icons = {
+  router: `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="#0284c7" stroke="#38bdf8" stroke-width="2"/><path d="M16 18l16 12M32 18L16 30M24 12v24M12 24h24" stroke="#fff" stroke-width="2"/></svg>`,
+  switch: `<svg viewBox="0 0 48 48"><rect x="6" y="14" width="36" height="20" rx="4" fill="#0d9488" stroke="#2dd4bf" stroke-width="2"/><path d="M12 20h10l-3-3m17 11H26l3 3" stroke="#fff" stroke-width="2" fill="none"/></svg>`,
+  l3switch: `<svg viewBox="0 0 48 48"><rect x="6" y="12" width="36" height="24" rx="4" fill="#4f46e5" stroke="#818cf8" stroke-width="2"/><circle cx="24" cy="24" r="6" stroke="#fff" stroke-width="2" fill="none"/></svg>`,
+  pc: `<svg viewBox="0 0 48 48"><rect x="10" y="10" width="28" height="20" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="2"/><path d="M18 36h12M24 30v6" stroke="#94a3b8" stroke-width="2"/></svg>`,
+  server: `<svg viewBox="0 0 48 48"><rect x="14" y="6" width="20" height="36" rx="3" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/><circle cx="24" cy="14" r="2" fill="#10b981"/><circle cx="24" cy="22" r="2" fill="#10b981"/></svg>`,
+  firewall: `<svg viewBox="0 0 48 48"><rect x="8" y="12" width="32" height="24" rx="3" fill="#be123c" stroke="#fb7185" stroke-width="2"/><path d="M8 20h32M8 28h32M20 12v8M30 20v8M18 28v8" stroke="#fecdd3" stroke-width="1.5"/></svg>`
+};
+
+function logSystem(msg) {
+  const el = document.getElementById('sys-log');
+  const time = new Date().toLocaleTimeString();
+  el.innerHTML += `[${time}] ${msg}<br>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function setMode(newMode) {
+  mode = newMode;
+  cableSourceNode = null;
+  pingSourceNode = null;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.cable-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.net-node').forEach(n => n.classList.remove('selected', 'ping-src'));
+
+  if (newMode === 'select') document.getElementById('btn-select').classList.add('active');
+  if (newMode === 'ping') {
+    document.getElementById('btn-ping').classList.add('active');
+    logSystem('وضع المحاكاة (Ping): اختر الجهاز المرسل ثم الجهاز المستقبل.');
+  }
+}
+
+function selectCable(type) {
+  setMode('cable');
+  selectedCableType = type;
+  document.getElementById('cable-' + type).classList.add('selected');
+  logSystem(`تم اختيار كابل (${type}). اضغط على الجهاز الأول ثم الثاني للتوصيل.`);
+}
+
+// السحب من القائمة الجانبية للساحة
+function onPaletteDragStart(e, type) {
+  paletteDragType = type;
+}
+
+function onWorkspaceDrop(e) {
+  e.preventDefault();
+  if (!paletteDragType) return;
+  const rect = workspace.getBoundingClientRect();
+  const x = Math.max(10, Math.min(workspace.clientWidth - 110, e.clientX - rect.left - 48));
+  const y = Math.max(10, Math.min(workspace.clientHeight - 100, e.clientY - rect.top - 42));
+  addDevice(paletteDragType, x, y);
+  paletteDragType = null;
+}
+
+function addDevice(type, customX = null, customY = null, customData = null) {
+  const id = 'dev_' + idCounter++;
+  const defaultNames = { router: 'Router', switch: 'Switch', l3switch: 'L3-Switch', pc: 'PC', server: 'Server', firewall: 'ASA-FW' };
+  const name = customData?.name || `${defaultNames[type]}-${devices.length + 1}`;
+  const x = customX ?? (100 + (devices.length * 55) % Math.max(200, workspace.clientWidth - 220));
+  const y = customY ?? (80 + (devices.length * 40) % Math.max(150, workspace.clientHeight - 180));
+
+  const dev = {
+    id, type, name, x, y,
+    interfaces: {
+      'Gig0/0': { ip: customData?.ip || '', mask: customData?.mask || '255.255.255.0', status: 'up' },
+      'Gig0/1': { ip: '', mask: '255.255.255.0', status: 'up' },
+      'Fast0/0': { ip: '', mask: '255.255.255.0', status: 'up' }
+    },
+    gateway: customData?.gateway || ''
+  };
+  devices.push(dev);
+  renderDevice(dev);
+  updateRoutingSummary();
+  logSystem(`تم إضافة الجهاز: ${dev.name} (${type.toUpperCase()})`);
+  return dev;
+}
+
+function getPrimaryIp(dev) {
+  for (const iface of Object.values(dev.interfaces)) {
+    if (iface.ip) return iface.ip;
+  }
+  return '';
+}
+
+function isDeviceActive(dev) {
+  return Object.values(dev.interfaces).some(iface => iface.status === 'up');
+}
+
+function renderDevice(dev) {
+  const el = document.createElement('div');
+  el.className = 'net-node';
+  el.id = dev.id;
+  el.style.left = dev.x + 'px';
+  el.style.top = dev.y + 'px';
+
+  el.innerHTML = `
+    ${icons[dev.type]}
+    <div class="node-name">${dev.name}</div>
+    <div class="node-ip">${getPrimaryIp(dev) || 'No IP'}</div>
+  `;
+
+  el.addEventListener('mousedown', (e) => {
+    if (mode !== 'select' || e.button !== 0) return;
+    draggedDev = dev;
+    dragOffsetX = e.clientX - dev.x;
+    dragOffsetY = e.clientY - dev.y;
+  });
+
+  el.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (mode === 'cable') handleCableClick(dev, el);
+    else if (mode === 'ping') handlePingClick(dev, el);
+  });
+
+  el.addEventListener('dblclick', () => openDeviceModal(dev));
+  workspace.appendChild(el);
+}
+
+// مستمع حركة موحد للساحة كلها (خفيف وسريع جداً)
+window.addEventListener('mousemove', (e) => {
+  if (!draggedDev) return;
+  draggedDev.x = Math.max(10, Math.min(workspace.clientWidth - 106, e.clientX - dragOffsetX));
+  draggedDev.y = Math.max(10, Math.min(workspace.clientHeight - 95, e.clientY - dragOffsetY));
+  const el = document.getElementById(draggedDev.id);
+  if (el) {
+    el.style.left = draggedDev.x + 'px';
+    el.style.top = draggedDev.y + 'px';
+  }
+  renderCables();
+});
+
+window.addEventListener('mouseup', () => {
+  draggedDev = null;
+});
+
+function handleCableClick(dev, el) {
+  if (!cableSourceNode) {
+    cableSourceNode = dev;
+    el.classList.add('selected');
+  } else if (cableSourceNode.id !== dev.id) {
+    const exists = links.some(l => (l.from === cableSourceNode.id && l.to === dev.id) || (l.from === dev.id && l.to === cableSourceNode.id));
+    if (!exists) {
+      links.push({ from: cableSourceNode.id, to: dev.id, type: selectedCableType });
+      renderCables();
+      logSystem(`تم توصيل ${cableSourceNode.name} <---> ${dev.name} بكابل (${selectedCableType})`);
+    }
+    document.querySelectorAll('.net-node').forEach(n => n.classList.remove('selected'));
+    cableSourceNode = null;
+    setMode('select');
+  }
+}
+
+function renderCables() {
+  cablesSvg.innerHTML = '';
+  const colors = { straight: '#10b981', crossover: '#f59e0b', fiber: '#f97316', serial: '#ef4444' };
+
+  links.forEach(link => {
+    const d1 = devices.find(d => d.id === link.from);
+    const d2 = devices.find(d => d.id === link.to);
+    if (!d1 || !d2) return;
+
+    const x1 = d1.x + 48, y1 = d1.y + 42;
+    const x2 = d2.x + 48, y2 = d2.y + 42;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', colors[link.type] || '#10b981');
+    line.setAttribute('stroke-width', '3');
+    if (link.type === 'crossover') line.setAttribute('stroke-dasharray', '6,4');
+    cablesSvg.appendChild(line);
+
+    const up1 = isDeviceActive(d1);
+    const up2 = isDeviceActive(d2);
+    const bothUp = up1 && up2;
+
+    [
+      [x1 + (x2 - x1) * 0.18, y1 + (y2 - y1) * 0.18, bothUp ? '#22c55e' : '#ef4444'],
+      [x2 - (x2 - x1) * 0.18, y2 - (y2 - y1) * 0.18, bothUp ? '#22c55e' : '#ef4444']
+    ].forEach(([cx, cy, color]) => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', '4.5');
+      c.setAttribute('fill', color);
+      cablesSvg.appendChild(c);
+    });
+  });
+}
+
+function handlePingClick(dev, el) {
+  if (!pingSourceNode) {
+    pingSourceNode = dev;
+    el.classList.add('ping-src');
+  } else if (pingSourceNode.id !== dev.id) {
+    simulatePacket(pingSourceNode, dev);
+    document.querySelectorAll('.net-node').forEach(n => n.classList.remove('ping-src'));
+    pingSourceNode = null;
+    setMode('select');
+  }
+}
+
+function isSameSubnet(ip1, ip2, mask) {
+  if (!ip1 || !ip2) return false;
+  const p1 = ip1.split('.').map(Number);
+  const p2 = ip2.split('.').map(Number);
+  const m = (mask || '255.255.255.0').split('.').map(Number);
+  if (p1.length !== 4 || p2.length !== 4) return false;
+  for (let i = 0; i < 4; i++) {
+    if ((p1[i] & m[i]) !== (p2[i] & m[i])) return false;
+  }
+  return true;
+}
+
+function findPath(startId, endId) {
+  let queue = [[startId]];
+  let visited = new Set([startId]);
+  while (queue.length > 0) {
+    let path = queue.shift();
+    let node = path[path.length - 1];
+    if (node === endId) return path;
+    links.forEach(l => {
+      let next = l.from === node ? l.to : (l.to === node ? l.from : null);
+      if (next && !visited.has(next)) {
+        visited.add(next);
+        queue.push([...path, next]);
+      }
+    });
+  }
+  return null;
+}
+
+function simulatePacket(src, dst) {
+  const pathIds = findPath(src.id, dst.id);
+  const srcIp = getPrimaryIp(src);
+  const dstIp = getPrimaryIp(dst);
+  const time = new Date().toLocaleTimeString();
+
+  if (!pathIds) {
+    addSimLog(time, '❌ فشل (No Link)', src.name, dst.name, 'ICMP', 'Layer 1 Physical: لا يوجد كابل متصل بين الجهازين.');
+    return;
+  }
+
+  const allPortsUp = pathIds.every(id => {
+    const d = devices.find(x => x.id === id);
+    return d && isDeviceActive(d);
+  });
+
+  if (!allPortsUp) {
+    addSimLog(time, '❌ فشل (Port Down)', src.name, dst.name, 'Layer 1/2', 'أحد المنافذ في المسار مغلق (Shutdown).');
+    return;
+  }
+
+  if (!srcIp || !dstIp) {
+    addSimLog(time, '❌ فشل (No IP)', src.name, dst.name, 'IPv4', 'Layer 3 Network: أحد الجهازين لا يملك عنوان IP.');
+    return;
+  }
+
+  const activeMask = Object.values(src.interfaces).find(i => i.ip)?.mask || '255.255.255.0';
+  const sameNet = isSameSubnet(srcIp, dstIp, activeMask);
+  const hasRouterInPath = pathIds.some(id => {
+    const d = devices.find(x => x.id === id);
+    return d && (d.type === 'router' || d.type === 'l3switch' || d.type === 'firewall');
+  });
+
+  const success = sameNet || (hasRouterInPath && src.gateway);
+
+  const pkt = document.createElement('div');
+  pkt.className = 'packet-dot';
+  pkt.textContent = 'IP';
+  workspace.appendChild(pkt);
+
+  let step = 0;
+  function animateStep() {
+    if (step >= pathIds.length) {
+      pkt.remove();
+      if (success) {
+        addSimLog(time, '✅ ناجح (Reply)', `${src.name} (${srcIp})`, `${dst.name} (${dstIp})`, 'ICMP Echo', 'L7 App -> L3 IP Routing -> L2 MAC Frame -> L1 Bits (TTL=64)');
+      } else {
+        addSimLog(time, '⚠️ غير قابل للوصول', `${src.name} (${srcIp})`, `${dst.name} (${dstIp})`, 'ICMP', 'Layer 3 Error: شبكتان مختلفتان بدون Default Gateway أو راوتر.');
+      }
+      return;
+    }
+    const currDev = devices.find(d => d.id === pathIds[step]);
+    pkt.style.transition = 'all 0.5s ease-in-out';
+    pkt.style.left = (currDev.x + 48) + 'px';
+    pkt.style.top = (currDev.y + 42) + 'px';
+    step++;
+    setTimeout(animateStep, 550);
+  }
+  const first = devices.find(d => d.id === pathIds[0]);
+  pkt.style.left = (first.x + 48) + 'px';
+  pkt.style.top = (first.y + 42) + 'px';
+  setTimeout(animateStep, 80);
+}
+
+function addSimLog(time, status, src, dst, proto, osi) {
+  const tbody = document.getElementById('sim-log-body');
+  if (tbody.innerHTML.includes('لا توجد حزم')) tbody.innerHTML = '';
+  const row = `<tr>
+    <td>${time}</td>
+    <td><strong>${status}</strong></td>
+    <td>${src}</td>
+    <td>${dst}</td>
+    <td>${proto}</td>
+    <td style="color:#94a3b8;">${osi}</td>
+  </tr>`;
+  tbody.insertAdjacentHTML('afterbegin', row);
+}
+
+function openDeviceModal(dev) {
+  activeDevice = dev;
+  document.getElementById('modal-device-title').textContent = `إعدادات: ${dev.name} (${dev.type.toUpperCase()})`;
+  document.getElementById('cfg-hostname').value = dev.name;
+  document.getElementById('cfg-gw').value = dev.gateway || '';
+  loadInterfaceData();
+
+  cliState = { mode: 'user', iface: 'Gig0/0' };
+  document.getElementById('cli-output').textContent = `Cisco IOS Software, Version 15.4(3)M2\nSystem Bootstrap, Version 15.1(4)M4\n\nType '?' or 'help' for available commands.\n\n`;
+  updateCliPrompt();
+
+  document.getElementById('device-modal').classList.add('open');
+}
+
+function loadInterfaceData() {
+  if (!activeDevice) return;
+  const iface = document.getElementById('cfg-iface').value;
+  const data = activeDevice.interfaces[iface] || { ip: '', mask: '255.255.255.0', status: 'up' };
+  document.getElementById('cfg-ip').value = data.ip;
+  document.getElementById('cfg-mask').value = data.mask;
+  document.getElementById('cfg-status').value = data.status;
+}
+
+function saveDeviceConfig() {
+  if (!activeDevice) return;
+  activeDevice.name = document.getElementById('cfg-hostname').value || activeDevice.name;
+  activeDevice.gateway = document.getElementById('cfg-gw').value;
+  const iface = document.getElementById('cfg-iface').value;
+  activeDevice.interfaces[iface] = {
+    ip: document.getElementById('cfg-ip').value.trim(),
+    mask: document.getElementById('cfg-mask').value.trim() || '255.255.255.0',
+    status: document.getElementById('cfg-status').value
+  };
+
+  refreshDeviceNodeUI(activeDevice);
+  renderCables();
+  updateRoutingSummary();
+  logSystem(`تم حفظ إعدادات ${activeDevice.name} (${iface}: ${activeDevice.interfaces[iface].ip || 'No IP'})`);
+  closeModal('device-modal');
+}
+
+function refreshDeviceNodeUI(dev) {
+  const el = document.getElementById(dev.id);
+  if (!el) return;
+  el.querySelector('.node-name').textContent = dev.name;
+  el.querySelector('.node-ip').textContent = getPrimaryIp(dev) || 'No IP';
+}
+
+function deleteSelectedDevice() {
+  if (!activeDevice) return;
+  devices = devices.filter(d => d.id !== activeDevice.id);
+  links = links.filter(l => l.from !== activeDevice.id && l.to !== activeDevice.id);
+  const el = document.getElementById(activeDevice.id);
+  if (el) el.remove();
+  renderCables();
+  updateRoutingSummary();
+  closeModal('device-modal');
+}
+
+function updateCliPrompt() {
+  const h = activeDevice ? activeDevice.name : 'Router';
+  let suffix = '>';
+  if (cliState.mode === 'priv') suffix = '#';
+  else if (cliState.mode === 'config') suffix = '(config)#';
+  else if (cliState.mode === 'iface') suffix = '(config-if)#';
+  document.getElementById('cli-prompt').textContent = h + suffix;
+}
+
+function handleCliKey(e) {
+  if (e.key !== 'Enter') return;
+  const input = document.getElementById('cli-input');
+  const rawCmd = input.value.trim();
+  const cmd = rawCmd.toLowerCase();
+  const out = document.getElementById('cli-output');
+  const promptText = document.getElementById('cli-prompt').textContent;
+
+  out.textContent += `${promptText} ${rawCmd}\n`;
+  input.value = '';
+
+  if (!rawCmd) return;
+
+  if (cmd === 'enable' || cmd === 'en') {
+    cliState.mode = 'priv';
+  } else if (cmd === 'configure terminal' || cmd === 'conf t') {
+    if (cliState.mode === 'priv') cliState.mode = 'config';
+    else out.textContent += `% Invalid input detected. Type 'enable' first.\n`;
+  } else if (cmd.startsWith('hostname ') && cliState.mode === 'config') {
+    activeDevice.name = rawCmd.split(' ')[1];
+    refreshDeviceNodeUI(activeDevice);
+    updateRoutingSummary();
+  } else if (cmd.startsWith('interface ') && cliState.mode === 'config') {
+    const arg = cmd.replace('interface ', '').trim();
+    if (arg.includes('0/1')) cliState.iface = 'Gig0/1';
+    else if (arg.includes('fast')) cliState.iface = 'Fast0/0';
+    else cliState.iface = 'Gig0/0';
+    cliState.mode = 'iface';
+  } else if (cmd.startsWith('ip address ') && cliState.mode === 'iface') {
+    const parts = rawCmd.split(/\s+/);
+    if (parts.length >= 4) {
+      activeDevice.interfaces[cliState.iface].ip = parts[2];
+      activeDevice.interfaces[cliState.iface].mask = parts[3];
+      refreshDeviceNodeUI(activeDevice);
+      updateRoutingSummary();
+    } else {
+      out.textContent += `% Incomplete command. Usage: ip address <ip> <mask>\n`;
+    }
+  } else if (cmd === 'no shutdown' && cliState.mode === 'iface') {
+    activeDevice.interfaces[cliState.iface].status = 'up';
+    out.textContent += `%LINK-3-UPDOWN: Interface ${cliState.iface}, changed state to up\n`;
+    renderCables();
+  } else if (cmd === 'shutdown' && cliState.mode === 'iface') {
+    activeDevice.interfaces[cliState.iface].status = 'down';
+    out.textContent += `%LINK-5-CHANGED: Interface ${cliState.iface}, changed state to administratively down\n`;
+    renderCables();
+  } else if (cmd.startsWith('ping ')) {
+    const targetIp = rawCmd.split(/\s+/)[1];
+    const targetDev = devices.find(d => getPrimaryIp(d) === targetIp);
+    if (targetDev && findPath(activeDevice.id, targetDev.id)) {
+      out.textContent += `Sending 5, 100-byte ICMP Echos to ${targetIp}, timeout is 2 seconds:\n!!!!!\nSuccess rate is 100 percent (5/5)\n`;
+    } else {
+      out.textContent += `Sending 5, 100-byte ICMP Echos to ${targetIp}, timeout is 2 seconds:\n.....\nSuccess rate is 0 percent (0/5)\n`;
+    }
+  } else if (cmd === 'exit' || cmd === 'end') {
+    if (cmd === 'end') cliState.mode = 'priv';
+    else if (cliState.mode === 'iface') cliState.mode = 'config';
+    else if (cliState.mode === 'config') cliState.mode = 'priv';
+    else cliState.mode = 'user';
+  } else if (cmd === 'show ip interface brief' || cmd === 'sh ip int br') {
+    out.textContent += `Interface              IP-Address      OK? Method Status                Protocol\n`;
+    Object.entries(activeDevice.interfaces).forEach(([k, v]) => {
+      out.textContent += `${k.padEnd(22)} ${(v.ip || 'unassigned').padEnd(15)} YES manual ${v.status.padEnd(21)} ${v.status}\n`;
+    });
+  } else if (cmd === 'help' || cmd === '?') {
+    out.textContent += `Commands: enable, configure terminal, hostname <name>, interface gig0/0|gig0/1|fast0/0, ip address <ip> <mask>, no shutdown, shutdown, ping <ip>, show ip interface brief, exit\n`;
+  } else {
+    out.textContent += `% Unknown command. Type '?' for help.\n`;
+  }
+
+  updateCliPrompt();
+  out.scrollTop = out.scrollHeight;
+}
+
+function runDesktopPing() {
+  const targetIp = document.getElementById('desk-ping-ip').value.trim();
+  const out = document.getElementById('desk-ping-out');
+  const targetDev = devices.find(d => getPrimaryIp(d) === targetIp);
+  out.textContent = `Pinging ${targetIp} with 32 bytes of data:\n\n`;
+
+  if (targetDev && findPath(activeDevice.id, targetDev.id) && isDeviceActive(activeDevice) && isDeviceActive(targetDev)) {
+    out.textContent += `Reply from ${targetIp}: bytes=32 time=2ms TTL=64\nReply from ${targetIp}: bytes=32 time=1ms TTL=64\nReply from ${targetIp}: bytes=32 time=2ms TTL=64\n\nPing statistics for ${targetIp}: Packets: Sent = 3, Received = 3, Lost = 0 (0% loss)`;
+  } else {
+    out.textContent += `Request timed out.\nRequest timed out.\nDestination host unreachable.`;
+  }
+}
+
+function updateRoutingSummary() {
+  const div = document.getElementById('routing-summary');
+  if (devices.length === 0) {
+    div.innerHTML = 'قم بإضافة أجهزة وتعيين عناوين IP لعرض جدول التوجيه هنا...';
+    return;
+  }
+  div.innerHTML = devices.map(d => {
+    const ip = getPrimaryIp(d) || 'Unassigned';
+    return `• <b>${d.name}</b> [${d.type.toUpperCase()}] -> IP: <span style="color:#38bdf8">${ip}</span> | GW: ${d.gateway || 'None'}`;
+  }).join('<br>');
+}
+
+function loadSampleTopology() {
+  clearWorkspace();
+  const r1 = addDevice('router', 380, 60, { name: 'Core-Router', ip: '192.168.10.1', mask: '255.255.255.0' });
+  const sw1 = addDevice('switch', 210, 190, { name: 'Switch-Admin', ip: '192.168.10.2', mask: '255.255.255.0' });
+  const sw2 = addDevice('switch', 550, 190, { name: 'Switch-Sales', ip: '192.168.10.3', mask: '255.255.255.0' });
+  const pc1 = addDevice('pc', 130, 320, { name: 'Admin-PC', ip: '192.168.10.10', mask: '255.255.255.0', gateway: '192.168.10.1' });
+  const srv = addDevice('server', 630, 320, { name: 'Main-Server', ip: '192.168.10.50', mask: '255.255.255.0', gateway: '192.168.10.1' });
+
+  links.push(
+    { from: r1.id, to: sw1.id, type: 'straight' },
+    { from: r1.id, to: sw2.id, type: 'fiber' },
+    { from: sw1.id, to: pc1.id, type: 'straight' },
+    { from: sw2.id, to: srv.id, type: 'straight' }
+  );
+  renderCables();
+  logSystem('تم تحميل شبكة متكاملة جاهزة! اضغط على "إرسال حزمة (Ping PDU)" وجرب الإرسال بين Admin-PC و Main-Server.');
+}
+
+function clearWorkspace() {
+  devices = []; links = [];
+  document.querySelectorAll('.net-node').forEach(n => n.remove());
+  cablesSvg.innerHTML = '';
+  updateRoutingSummary();
+}
+
+const codeSnippets = {
+  cpp: `#include <iostream>
+#include <cstdio>
+#include <cstdint>
+#include <string>
+using namespace std;
+
+// محرك حساب الشبكات الفرعية (Bitwise Subnetting in C++)
+struct Packet {
+    string srcIP, dstIP;
+    int ttl = 64;
+};
+
+uint32_t ipToInt(const string& ip) {
+    uint32_t a, b, c, d;
+    sscanf(ip.c_str(), "%u.%u.%u.%u", &a, &b, &c, &d);
+    return (a << 24) | (b << 16) | (c << 8) | d;
+}
+
+bool isSameSubnet(const string& ip1, const string& ip2, const string& mask) {
+    uint32_t m = ipToInt(mask);
+    return (ipToInt(ip1) & m) == (ipToInt(ip2) & m);
+}
+
+int main() {
+    Packet pkt{"192.168.10.10", "192.168.10.50", 64};
+    if (isSameSubnet(pkt.srcIP, pkt.dstIP, "255.255.255.0")) {
+        cout << "[C++ Engine] Direct Layer-2 ARP Delivery Approved!" << endl;
+    }
+    return 0;
+}`,
+  java: `import java.net.InetAddress;
+
+// محاكي فحص التوجيه والـ Ping بلغة Java
+public class CiscoPacketEngine {
+    public static boolean checkSubnet(String ip1, String ip2, String mask) throws Exception {
+        byte[] a1 = InetAddress.getByName(ip1).getAddress();
+        byte[] a2 = InetAddress.getByName(ip2).getAddress();
+        byte[] m  = InetAddress.getByName(mask).getAddress();
+        for (int i = 0; i < 4; i++) {
+            if ((a1[i] & m[i]) != (a2[i] & m[i])) return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) throws Exception {
+        boolean reach = checkSubnet("192.168.10.10", "192.168.10.50", "255.255.255.0");
+        System.out.println("[Java Engine] Same Broadcast Domain: " + reach);
+    }
+}`,
+  js: `// محرك توجيه الحزم الحي في المتصفح (JavaScript BFS Routing)
+function routePacket(sourceNode, targetNode, topologyLinks) {
+  console.log(\`[JS Engine] Routing from \${sourceNode.name} to \${targetNode.name}\`);
+  const bfsQueue = [[sourceNode.id]];
+  const visited = new Set([sourceNode.id]);
+
+  while (bfsQueue.length > 0) {
+    const currentPath = bfsQueue.shift();
+    const lastHop = currentPath[currentPath.length - 1];
+    if (lastHop === targetNode.id) return currentPath;
+
+    for (const link of topologyLinks) {
+      const neighbor = link.from === lastHop ? link.to : (link.to === lastHop ? link.from : null);
+      if (neighbor && !visited.has(neighbor)) {
+        visited.add(neighbor);
+        bfsQueue.push([...currentPath, neighbor]);
+      }
+    }
+  }
+  return null;
+}`,
+  py: `from netmiko import ConnectHandler
+
+# أتمتة برمجة راوترات وسويتشات سيسكو الحقيقية بلغة Python
+cisco_router = {
+    'device_type': 'cisco_ios',
+    'host': '192.168.10.1',
+    'username': 'admin',
+    'password': 'cisco_secure_password',
+}
+
+def configure_vlan_and_ospf():
+    conn = ConnectHandler(**cisco_router)
+    commands = [
+        'vlan 10',
+        'name MANAGEMENT_VLAN',
+        'router ospf 1',
+        'network 192.168.10.0 0.0.0.255 area 0'
+    ]
+    output = conn.send_config_set(commands)
+    print("[Python Netmiko] Configuration Applied:\\n", output)
+
+configure_vlan_and_ospf()`
+};
+
+function openCodeModal() {
+  document.getElementById('code-display').textContent = codeSnippets.cpp;
+  document.getElementById('code-modal').classList.add('open');
+}
+
+function selectCodeLang(lang, tabEl) {
+  document.querySelectorAll('#code-modal .m-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById('code-display').textContent = codeSnippets[lang];
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(document.getElementById('code-display').textContent);
+  logSystem('تم نسخ الكود البرمجي إلى الحافظة بنجاح.');
+}
+
+function executeSimulatedCode() {
+  closeModal('code-modal');
+  logSystem('تم تنفيذ خوارزمية التوجيه وفحص الشبكة بنجاح على جميع الأجهزة المتصلة.');
+  if (devices.length >= 2) simulatePacket(devices[0], devices[devices.length - 1]);
+}
+
+function switchModalTab(tab, el) {
+  document.querySelectorAll('#device-modal .m-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['config', 'cli', 'desktop'].forEach(t => {
+    document.getElementById('mtab-' + t).style.display = (t === tab) ? 'block' : 'none';
+  });
+}
+
+function switchDock(pane, el) {
+  document.querySelectorAll('.dock-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.dock-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + pane).classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+window.addEventListener('DOMContentLoaded', loadSampleTopology);
+</script>
+</body>
+</html>
